@@ -17,3 +17,4 @@ set GEM_HOME=%JRUBY_HOME%\lib\ruby\gems\shared
 set JRUBY_OPTS=%JRUBY_OPTS% --1.9
 
 cd "%PRJ_HOME%\AutoTest"
+

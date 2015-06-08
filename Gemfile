@@ -38,6 +38,7 @@ group :development, :test do
 	gem 'rspec-mocks'#, github: 'rspec/rspec-mocks'
 	gem 'rspec-expectations'#, github: 'rspec/rspec-expectations'
 	gem 'rspec-support'#, github: 'rspec/rspec-support'
+	gem 'rspec-rails'
 	gem 'poltergeist'
 	gem 'capybara'
 	gem 'launchy'

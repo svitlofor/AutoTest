@@ -141,6 +141,14 @@ GEM
     rspec-mocks (3.2.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.2.0)
+    rspec-rails (3.2.3)
+      actionpack (>= 3.0, < 4.3)
+      activesupport (>= 3.0, < 4.3)
+      railties (>= 3.0, < 4.3)
+      rspec-core (~> 3.2.0)
+      rspec-expectations (~> 3.2.0)
+      rspec-mocks (~> 3.2.0)
+      rspec-support (~> 3.2.0)
     rspec-support (3.2.2)
     sass (3.4.14)
     sass-rails (5.0.3)
@@ -200,6 +208,7 @@ DEPENDENCIES
   rspec-core
   rspec-expectations
   rspec-mocks
+  rspec-rails
   rspec-support
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
