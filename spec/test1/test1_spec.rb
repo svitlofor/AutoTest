@@ -1,0 +1,205 @@
+# encoding: utf-8
+require 'spec_helper'
+require 'open-uri'
+
+Capybara.app_host = 'http://www.trafficrules.com.ua'
+Capybara.run_server = false
+
+
+describe "the open", :type => :feature do
+  def login
+    login_ = "trafficrulestest"
+    password_ = "nhfaabrhektcgfhjkm"
+    login_ = "Avto21"
+    password_ = "lviv2015"
+
+    visit '/UCenter/pages/login/login.jsf?lang=uk_UA'
+    within("#loginForm") do
+       input = all("input", 1)[0]
+       login_input = all("input", 1)[0]
+       login_input_id =login_input[:id]
+       login_input.set(login_)
+       pass_input = all("input", 1)[1]
+       pass_input_id =pass_input[:id]
+       pass_input.set(password_)
+       submit_button = all("button", 1)[0]
+       submit_button_id = submit_button[:id]
+       submit_button.click
+      # fill_in "input[id='#{login_input_id}']", :with => login_
+      # fill_in "input[id='#{pass_input_id}']", :with => password_
+    end
+    #click_button "button[id=\"#{submit_input_id}\"]"
+    sleep 3
+    save_screenshot("screenshots/login_result.png")
+    puts "Logged in successfully!"
+  end
+
+  def go_to_topics(topic = "По темах")
+    find_link(topic).click
+    sleep 3
+    save_screenshot("screenshots/go_to_topic_result.png")
+    puts "Choose type: #{topic} successfully!"
+  end
+
+  def select_topic(number = 0)
+    radiobuttons = all(".ui-radiobutton")
+    radiobuttons[2].click # Тематичні завдання "Сигнал 2014" (Київ)
+    radiobuttons[3].click # Українська мова
+    topic_text = find(".ui-selectlistbox-list").all("li")[number].text
+    logit topic_text
+    find(".ui-selectlistbox-list").all("li")[number].click
+    sleep 1
+
+    save_screenshot("screenshots/select_topic_result.png")
+    puts "Select topic #{number} #{topic_text} successfully!"
+    topic_text
+  end  
+
+  def start
+    find("#optform\\:learnAll").click
+    sleep 1
+    save_screenshot("screenshots/start_result.png")
+  end
+
+  def get_image
+    img = all("#qForm div[align='center']")[0].all("img")[0]
+    img && img["src"]
+  end
+
+  def check_topic_folder(topic_id)
+    topic_folder = File.join("tests/images", "#{topic_id}")
+    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
+    topic_folder
+  end  
+
+  def save_image(topic_id, test_id, src)
+    topic_folder = check_topic_folder(topic_id)
+    image_file_name = File.join(topic_folder, "#{test_id}.gif")
+    open(image_file_name, 'wb') do |file|
+      file << open(src).read
+    end
+    image_file_name
+  end  
+
+  def parse_test(topic_number, test_number)
+    puts "Parsing test #{test_number}."
+    legend = "Коментар до питання "
+    test = nil
+    save_screenshot("screenshots/current_parsed_test.png")
+
+    within("#qForm") do
+      img_src = get_image
+      test_image = img_src.nil? ? nil : save_image(topic_number, test_number, img_src)
+
+      test_answers = []
+      test_text = all("fieldset")[0].find("div").text
+
+      rows = all("fieldset")[1].all('table').last.all("tr")
+      rows.last.all("td").last.click
+      sleep 1
+
+      save_screenshot("screenshots/current_parsed_test_clicked.png")
+
+      rows = all("fieldset")[1].all('table').last.all("tr")
+      rows.each do |row|
+        records = row.all("td")
+#        img_src = records[0].all("img")[0] && records[0].all("img")[0] && ['src']
+        check = !!((img = records[0].all("img")[0]) && (img["src"] =~ /img\/check.*/))
+        number = records[1].text
+        text = records[2].text
+        test_answers << {right: check, number: number, text: text}
+      end
+
+      test_comment = all("fieldset")[2].text
+      test_comment = test_comment[legend.size..-1]
+      test = {number: test_number, text: test_text, answers: test_answers, comment: test_comment, image: test_image}
+
+      logit test.to_yaml
+    end
+    test
+  end
+
+  def save_topic(topic)
+    topic_file = File.join("tests", "topic_#{topic[:number]}.yaml")
+    File.open(topic_file, "w") do |file|
+      file.write(topic.to_yaml)
+    end
+  end  
+
+  def next_test
+    find("#navForm\\:j_idt53").click
+    sleep 1
+  end
+
+  def curr_test_number
+    find("#navForm\\:info").text.split(" ")[0].to_i
+  end  
+
+  def test_length
+    find("#navForm\\:info").text.split(" ")[2].to_i
+  end
+
+  def test_plus_ten
+    find("#navForm\\:j_idt57").click
+    sleep 1
+  end  
+
+  def test_plus_five
+    find("#navForm\\:j_idt55").click
+    sleep 1
+  end  
+
+  def get_full_topic(number, name)
+    start
+    tests = []
+    begin
+#      binding.pry
+
+      index = curr_test_number
+      test = parse_test(number, index)
+      tests << test
+
+      save_topic({number: number, name: name, tests: tests})
+
+      next_test
+    end while index != curr_test_number
+    topic = {number: number, name: name, tests: tests}
+  end
+
+  def exit_topic
+    find("#navForm\\:cancelExam").click
+    sleep 1
+  end 
+
+  before :each do
+    #User.make(:email => 'user@example.com', :password => 'password')
+  end
+
+  it "signs me in" do
+    login
+    topics_length = 37
+    num = 5
+    while num < 37
+      go_to_topics
+      topic = get_full_topic( num+1, select_topic(num) )
+      save_topic(topic)
+      exit_topic
+      num += 1
+    end
+    #expect(page).to have_content 'Success'
+
+    # within("#session") do
+    #   fill_in 'Email', :with => 'user@example.com'
+    #   fill_in 'Password', :with => 'password'
+    # end
+    # click_button 'Sign in'
+    # expect(page).to have_content 'Success'
+  end
+end
+
+=begin
+            33
+34
+            35
+36
+=end
