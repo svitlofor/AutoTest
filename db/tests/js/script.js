@@ -9,8 +9,7 @@ document.observe('dom:loaded', function(){
 	category.hide();
 	var topic = new Topic(test);
 	topic.hide();
-	var exam = new Exam();
-	var section = new Section(topic, category, exam);
+	var section = new Section(topic, category);
 	section.build();
 	console.log(section.element)
 }, false);
