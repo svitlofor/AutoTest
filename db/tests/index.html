@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+<head>
+    <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+    <title>Світлофор AutoTest</title>
+    <meta name="viewport" content="initial-scale = 1.0, maximum-scale = 1.0, user-scalable = no, width = device-width">
+
+    <!--[if lt IE 9]><script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <link rel="stylesheet" href="css/style.css" media="screen">
+    <!--[if lte IE 7]><link rel="stylesheet" href="css/style.ie7.css" media="screen" /><![endif]-->
+    <link rel="stylesheet" href="css/style.responsive.css" media="all">
+    <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+    <script src="js/prototype.js"></script>
+    <script src="js/loader.js"></script>
+    <script src="js/classes.js"></script>
+    <script src="js/script.js"></script>
+</head>
+<body>
+    <div class="wrapper">
+        <div id="header" class="header">
+            <img src="images/header.jpg" alt="Світлофор">
+        </div>
+        <div id="navigation" class="navigation">
+            <div id="section_container">
+                <label id="section_label" rel="section"> Виберіть розділ: </label>
+                <select id="section" size=1>
+                    <option value="">Не вибрано</option>
+                    <option value="topics">По темам</option>
+                    <option value="tickets">По білетам</option>
+                    <option value="exam">Іспит</option>
+                </select>
+            </div>    
+            <div id="category_container">
+                <label id="category_label" rel="category"> Виберіть категорію: </label>
+                <select id="category" size=1>
+                    <option value="">Не вибрано</option>
+                    <option value="AB">AB</option>
+                    <option value="CD">CD</option>
+                </select>
+            </div>
+            <div id="topics_container">
+                <label id="topics_label" rel="topics"> Виберіть тему: </label>
+                <select id="topics" size=1></select>
+            </div>
+            <div id="tickets_container">
+                <label id="tickets_label" rel="tickets"> Виберіть білет: </label>
+                <select id="tickets" size=1></select>
+            </div>
+        </div>
+        <div id="main" class="main">
+            <div id="test_container">
+                <div id="test"></div>
+            </div>
+        </div>
+        <div id="footer" class="footer">
+            © 2015, Автошкола "Світлофор"
+        </div>
+    </div>    
+</body>
+</html>            
