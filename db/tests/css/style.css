@@ -1,39 +1,151 @@
-.header{
-}
-
-.header img, .navigation, .main, .footer{
-	border: none;
-    display: block;
-    margin-left: auto;
-    margin-right: auto; 
-    text-align: center;
-	padding:10px;
-
-}
-
-
-
-.navigation{
-	height: 300;
-}
-
-.main{
-	border: solid black 1px;
-}
-
-html,
+html, 
 body {
 	margin:0;
 	padding:0;
 	height:100%;
 }
+
+.header img, 
+.navigation, 
+.main,
+.footer {
+	border: none;
+    display: block;
+    margin-left: auto;
+    margin-right: auto; 
+    text-align: center;
+    width: 95%;
+    height: auto;
+    background-size: 95% auto !important;
+}
+
 .wrapper {
 	min-height:100%;
 	position:relative;
 }
+
+.navigation{
+	height: 300;
+	background-color: #FDFAF4;
+}
+
+.navigation div{
+	padding: 5px;
+}
+
+.main{
+	/*border: solid black 1px;*/
+}
+
+div.separator{
+	clear: both;
+}
+
+#test_container #test_legend ul{
+	display: block;
+	height: 35px;
+	text-align: center;
+}
+
+#test_container #test_legend li{
+	display: block;
+	float: left;
+	width: 23px;
+	height: 23px;
+	border: 1px solid gray;
+	margin: 3px;
+	text-align: center;
+}
+
+#test_container #test_legend li.focus{
+	border: 2px solid black;
+}
+
+#test_container #test_legend li.wrong{
+	background-color: red;
+}
+
+#test_container #test_legend li.right{
+	background-color: green;
+}
+
+input.test_radio{
+	margin: 3px;
+}
+
+#test_container .test_text{
+	font-weight: bold;
+	padding: 2px;
+}
+
+#test_container #test_answers label.wrong{
+	color: red;
+}
+
+#test_container #test_answers label.right{
+	color: green;
+}
+
+#test_container #test_answers label{
+	cursor: pointer;
+}
+
+#test_container .tests_wrapper{
+	display: table;
+	width: 100%;
+}
+
+#test_container #test{
+	display: table-cell; 
+    vertical-align: middle;
+	width: 80%;    
+}
+
+#test_container #test_answers{
+    border: 1px solid #eeeeee;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;	
+}
+
+#test_container #test_answers .answer_div{
+	text-align: left;
+	margin: 10px;
+	cursor: pointer;
+}
+
+#test_container #test_comments{
+	padding: 5px;
+	border-top: 1px solid gray;
+}
+
+#test_controls a{
+	width: 40px;
+	height: 30px;
+	border: 1px solid #dddddd;
+	display: inline-block;
+	margin: 5px;
+	padding-top: 10px;
+	text-align: center;
+	vertical-align: middle;
+	cursor: pointer;
+}
+
+#test_controls a.prev{
+	background: url('../images/prev.png');
+}
+
+#test_controls a.next{
+	background: url('../images/next.png');
+}
+
+#test_controls input.exit_button{
+	float: right;
+}
+
 .footer {
 	width:100%;
-	height:10px;
+	height:0px;
 	position:absolute;
 	bottom:0;
 	left:0;

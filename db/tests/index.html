@@ -8,11 +8,11 @@
     <!--[if lt IE 9]><script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
     <link rel="stylesheet" href="css/style.css" media="screen">
     <!--[if lte IE 7]><link rel="stylesheet" href="css/style.ie7.css" media="screen" /><![endif]-->
-    <link rel="stylesheet" href="css/style.responsive.css" media="all">
     <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
     <script src="js/prototype.js"></script>
     <script src="js/loader.js"></script>
     <script src="js/classes.js"></script>
+    <script src="js/test.js"></script>
     <script src="js/script.js"></script>
 </head>
 <body>
@@ -22,7 +22,7 @@
         </div>
         <div id="navigation" class="navigation">
             <div id="section_container">
-                <label id="section_label" rel="section"> Виберіть розділ: </label>
+                <label id="section_label" for="section"> Виберіть розділ: </label>
                 <select id="section" size=1>
                     <option value="">Не вибрано</option>
                     <option value="topics">По темам</option>
@@ -31,7 +31,7 @@
                 </select>
             </div>    
             <div id="category_container">
-                <label id="category_label" rel="category"> Виберіть категорію: </label>
+                <label id="category_label" for="category"> Виберіть категорію: </label>
                 <select id="category" size=1>
                     <option value="">Не вибрано</option>
                     <option value="AB">AB</option>
@@ -39,18 +39,20 @@
                 </select>
             </div>
             <div id="topics_container">
-                <label id="topics_label" rel="topics"> Виберіть тему: </label>
+                <label id="topics_label" for="topics"> Виберіть тему: </label>
                 <select id="topics" size=1></select>
             </div>
             <div id="tickets_container">
-                <label id="tickets_label" rel="tickets"> Виберіть білет: </label>
+                <label id="tickets_label" for="tickets"> Виберіть білет: </label>
                 <select id="tickets" size=1></select>
             </div>
         </div>
         <div id="main" class="main">
             <div id="test_container">
                 <div id="test_legend"></div>
-                <div id="test">
+                <div class="separator"></div>
+                <div class="tests_wrapper">
+                    <div id="test"></div>
                 </div>
                 <div id="test_controls"></div>
             </div>
