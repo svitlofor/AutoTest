@@ -9,6 +9,8 @@ capybara-*.html
 .rspec
 /log
 /tmp
+/tests_yaml
+tests.zip
 /db/*.sqlite3
 /db/*.sqlite3-journal
 /public/system
