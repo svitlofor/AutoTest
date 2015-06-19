@@ -46,7 +46,7 @@ end
 
 group :production do
   gem 'rails_12factor'
-  gem 'pg'
+  gem 'activerecord-jdbcpostgresql-adapter'
 end
 
 gem 'pry_debug'
