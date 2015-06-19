@@ -42,7 +42,11 @@ group :development, :test do
 	gem 'poltergeist'
 	gem 'capybara'
 	gem 'launchy'
-	gem 'activerecord'
+end
+
+group :production do
+  gem 'rails_12factor'
+  gem 'pg'
 end
 
 gem 'pry_debug'
