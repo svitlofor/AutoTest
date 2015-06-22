@@ -26,8 +26,12 @@ var SelectClass = Class.create(BaseComponent, {
     this.component.selected_text = option.text;
   },
 
-  build: function(){
+  reset: function(){
     if($(this.element.options).length > 0) $(this.element.options)[0].selected = true;
+  },
+
+  build: function(){
+    this.reset();
     $(this.element).addEventListener('change', this.handler, false);
     this.show();
   }
@@ -75,6 +79,7 @@ var Topic = Class.create(SelectClass, {
     $super();
     this.file_path = this.topics_path + "/" + this.file_name;
     this.test = test;
+    test.topic = this;
   },
 
   read: function(callback){
@@ -130,6 +135,7 @@ var Ticket = Class.create(SelectClass, {
   initialize: function($super, test){
     $super();
     this.test = test;
+    test.ticket = this;
   },
 
   hide: function($super){
@@ -190,6 +196,7 @@ var Category = Class.create(SelectClass, {
   initialize: function($super, ticket){
     $super();
     this.ticket = ticket;
+    ticket.category = this;
   },
 
   hide: function($super){

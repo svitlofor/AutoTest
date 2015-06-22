@@ -5,8 +5,20 @@ body {
 	height:100%;
 }
 
-.header img, 
-.navigation, 
+.header img,
+.navigation
+{
+	border: none;
+    display: block;
+    margin-left: auto;
+    margin-right: auto; 
+    text-align: center;
+    width: 75%;
+    height: auto;
+    background-size: 75% auto !important;
+}
+
+ 
 .main,
 .footer {
 	border: none;
@@ -41,10 +53,20 @@ div.separator{
 	clear: both;
 }
 
-#test_container #test_legend ul{
+#test_container{
+	display: block;
+	text-align: center;
+}
+
+#test_container #test_legend{
 	display: block;
 	height: 35px;
 	text-align: center;
+}
+
+#test_container #test_legend ul{
+	display: block;
+	height: 35px;
 }
 
 #test_container #test_legend li{
@@ -55,6 +77,7 @@ div.separator{
 	border: 1px solid gray;
 	margin: 3px;
 	text-align: center;
+	cursor: pointer;
 }
 
 #test_container #test_legend li.focus{
@@ -69,6 +92,11 @@ div.separator{
 	background-color: green;
 }
 
+#test_container #test_legend .timer{
+	float: right;
+	font-weight: bold;
+}
+
 input.test_radio{
 	margin: 3px;
 }
@@ -80,10 +108,12 @@ input.test_radio{
 
 #test_container #test_answers label.wrong{
 	color: red;
+	font-weight: bold;
 }
 
 #test_container #test_answers label.right{
 	color: green;
+	font-weight: bold;
 }
 
 #test_container #test_answers label{
@@ -117,6 +147,14 @@ input.test_radio{
 #test_container #test_comments{
 	padding: 5px;
 	border-top: 1px solid gray;
+}
+
+#test_container #test_ext_comments{
+	font-weight: bold;	
+} 
+
+#test_container #test_ext_comments input{
+	float: left;
 }
 
 #test_controls a{

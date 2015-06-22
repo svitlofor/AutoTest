@@ -18,6 +18,11 @@ var Test = Class.create(BaseComponent, {
     var self = this;
     if(this.max_count <= this.default_max) {
       var self = this;
+
+      if(this.exam) {
+        legend_div.appendChild(this.create_timer(self.result_screen.bind(this)));
+        legend_div.appendChild(document.createElement('br'));
+      }  
       var ul = document.createElement('ul');
       var boxes = [];
       for(var i = 1; i <= this.max_count; i++){
@@ -56,9 +61,42 @@ var Test = Class.create(BaseComponent, {
     return null;
   },
 
+  create_timer: function(time_out_handler){
+    var start_time = new Date().getTime(),
+      span = document.createElement('span');
+
+    span.className = 'timer';
+    span.innerHTML = "20 : 00";
+    
+    function draw_time(){
+      var time_part_to_text = function(time){
+          return time  < 10 ? '0' + time : time;
+        },
+        time_to_text = function(minutes, seconds){
+          if(seconds == 60) {
+            minutes++;
+            seconds = 0;
+          }
+          return time_part_to_text(minutes) + " : " + time_part_to_text(seconds);
+        };
+
+      var dif = Math.floor((start_time - (new Date().getTime()))/1000),
+        seconds = dif % 60,
+        minutes = ~~(dif/60 % 60),
+        down_time_seconds = (60 + seconds),
+        down_time_minutes = (19 + minutes);
+
+      this.innerHTML = time_to_text(down_time_minutes, down_time_seconds);
+      if (down_time_minutes*60 + down_time_seconds <= 0) time_out_handler();
+    }
+    this.remove_timer();
+    this.timer = window.setInterval(draw_time.bind(span), 100);
+    return span;     
+  },
+
   build_image: function(img_src){
     if(img_src.length > 0){
-      img_src = "../" + img_src;
+//      img_src = "../" + img_src;
       var img = document.createElement("img");
       img.src = img_src;
       img.className = 'test_image';
@@ -152,6 +190,7 @@ var Test = Class.create(BaseComponent, {
   },
 
   add_comments: function(data){
+    if(this.exam) return;
     var comments_div = document.createElement('div');
     comments_div.id = 'test_comments';
     comments_div.className = 'test_comments';
@@ -206,6 +245,15 @@ var Test = Class.create(BaseComponent, {
       add_number_link(5);
     }
     if(!this.exam) this.build_exit_button(controls_div);
+
+    //add clickability to legend
+    $$("#" + this.legend_id + " ul li").each(function(li){
+      $(li).observe('click', function(){
+        var index = Number.parseInt(this.innerHTML.split(".")[0]);
+        self.go_to(index);
+        span.innerHTML = self.index + " з " + self.max_count;
+      })
+    });
   },
 
   build_exit_button: function(controls_div){
@@ -235,6 +283,7 @@ var Test = Class.create(BaseComponent, {
   },
 
   clean_legend: function(){
+    this.remove_timer();
     var legend_div = $$("#" + this.legend_id).first();
     legend_div.innerHTML = '';
     return legend_div;
@@ -256,17 +305,34 @@ var Test = Class.create(BaseComponent, {
     }  
   },
 
+  remove_timer: function(){
+    if(this.timer) window.clearInterval(this.timer);
+    this.timer = null;
+  },
+
   result_screen: function(){
     this.clean_legend();
     this.clean_controls();
     var right_answers = this.data.select(function(el){ return el['answered_right'] == true;}).length;
     var wrong_answers = this.data.select(function(el){ return el['answered_right'] == false;}).length;
-    if(this.exam && wrong_answers > 2){
-      this.element.innerHTML = "<b class='fail'>Іспит провалено!</b>";
-      return
-    }
-    if(this.exam && wrong_answers <= 2){
-      this.element.innerHTML = "<b class='pass'>Іспит складено!</b>";
+    if(this.exam){
+      if(this.ticket && this.ticket.category) this.ticket.category.reset();
+      var passed = (right_answers + 2) >= this.data.length;
+      if(passed){
+        if(this.timer) {
+          this.element.innerHTML = "<b class='pass'>Час вичерпано.<br />Іспит складено!</b>";
+          this.remove_timer();
+        } else {
+          this.element.innerHTML = "<b class='pass'>Іспит складено!</b>";
+        }          
+      } else {
+        if(this.timer) {
+          this.element.innerHTML = "<b class='fail'>Час вичерпано.<br />Іспит провалено!</b>";
+          this.remove_timer();
+        } else {  
+          this.element.innerHTML = "<b class='fail'>Іспит провалено!</b>";
+        }  
+      }
       return
     }
     var omitted_answers = this.data.select(function(el){ return el['answered_right'] == undefined;}).length;
@@ -296,5 +362,15 @@ var Test = Class.create(BaseComponent, {
 
   previous: function(){
     go_to(this.index - 1)
+  },
+
+  show: function($super){
+    $super();
+    $$("#header")[0].hide();
+  },
+
+  hide: function($super){
+    $super();
+    $$("#header")[0].show();
   }
 })
