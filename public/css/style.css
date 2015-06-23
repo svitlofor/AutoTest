@@ -181,6 +181,20 @@ input.test_radio{
 	float: right;
 }
 
+#test_container b{
+	font-size: 32px;
+	font-weight: bolder;
+}
+
+#test_container b.pass{
+	color: green;
+}
+
+#test_container b.fail{
+	color: red;
+}
+
+
 .footer {
 	width:100%;
 	height:0px;

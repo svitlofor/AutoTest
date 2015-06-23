@@ -4,6 +4,7 @@ var Test = Class.create(BaseComponent, {
   legend_id: 'test_legend',
   controls_id: 'test_controls',
   default_max: 20,
+  TIME_OUT: 'time_out',
 
   start: function(data){
     this.data = data;
@@ -62,7 +63,8 @@ var Test = Class.create(BaseComponent, {
   },
 
   create_timer: function(time_out_handler){
-    var start_time = new Date().getTime(),
+    var self = this,
+      start_time = new Date().getTime(),
       span = document.createElement('span');
 
     span.className = 'timer';
@@ -83,11 +85,14 @@ var Test = Class.create(BaseComponent, {
       var dif = Math.floor((start_time - (new Date().getTime()))/1000),
         seconds = dif % 60,
         minutes = ~~(dif/60 % 60),
-        down_time_seconds = (60 + seconds),
-        down_time_minutes = (19 + minutes);
+        // time for exam 19 minutest and 60 seconds
+        down_time_minutes = (19 + minutes),
+        down_time_seconds = (60 + seconds);
 
       this.innerHTML = time_to_text(down_time_minutes, down_time_seconds);
-      if (down_time_minutes*60 + down_time_seconds <= 0) time_out_handler();
+      if (down_time_minutes*60 + down_time_seconds <= 0) {
+        time_out_handler(self.TIME_OUT);
+      }  
     }
     this.remove_timer();
     this.timer = window.setInterval(draw_time.bind(span), 100);
@@ -310,31 +315,24 @@ var Test = Class.create(BaseComponent, {
     this.timer = null;
   },
 
-  result_screen: function(){
+  result_screen: function(reason){
     this.clean_legend();
     this.clean_controls();
     var right_answers = this.data.select(function(el){ return el['answered_right'] == true;}).length;
     var wrong_answers = this.data.select(function(el){ return el['answered_right'] == false;}).length;
+
     if(this.exam){
       if(this.ticket && this.ticket.category) this.ticket.category.reset();
       var passed = (right_answers + 2) >= this.data.length;
+      var timer_text = reason == this.TIME_OUT ? 'Час вичерпано.<br />' : '';
       if(passed){
-        if(this.timer) {
-          this.element.innerHTML = "<b class='pass'>Час вичерпано.<br />Іспит складено!</b>";
-          this.remove_timer();
-        } else {
-          this.element.innerHTML = "<b class='pass'>Іспит складено!</b>";
-        }          
+        this.element.innerHTML = "<b class='pass'>" + timer_text + "Іспит складено!</b>";
       } else {
-        if(this.timer) {
-          this.element.innerHTML = "<b class='fail'>Час вичерпано.<br />Іспит провалено!</b>";
-          this.remove_timer();
-        } else {  
-          this.element.innerHTML = "<b class='fail'>Іспит провалено!</b>";
-        }  
+        this.element.innerHTML = "<b class='fail'>" + timer_text + "Іспит провалено!</b>";
       }
       return
     }
+
     var omitted_answers = this.data.select(function(el){ return el['answered_right'] == undefined;}).length;
     this.element.innerHTML = '<b>Ваш результат:</b></br>Правильно: ' + right_answers +
       '.</br>Не правильно: ' + wrong_answers +
