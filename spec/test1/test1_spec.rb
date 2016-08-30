@@ -51,7 +51,7 @@ describe "the open", :type => :feature do
     sleep 1
 
     save_screenshot("screenshots/select_topic_result.png")
-    puts "Select topic #{number} #{topic_text} successfully!"
+    puts "Select topic #{type} #{number} #{topic_text} successfully!"
     topic_text
   end  
 
@@ -66,14 +66,20 @@ describe "the open", :type => :feature do
     img && img["src"]
   end
 
-  def check_topic_folder(topic_id, type)
-    topic_folder = File.join("tests", "#{type}", "images", "#{topic_id}")
+  def check_topic_folder(type, topic_id, subfolder = nil)
+    topic_folder = File.dirname(File.join(__FILE__))
+    topic_folder = File.join(topic_folder, "tests")
+    topic_folder = File.join(topic_folder, "#{type}")
+    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
+    topic_folder = File.join(topic_folder, subfolder) if subfolder
+    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
+    topic_folder = File.join(topic_folder, "#{topic_id}") 
     Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
     topic_folder
   end  
 
   def save_image(type, topic_id, test_id, src)
-    topic_folder = check_topic_folder(topic_id)
+    topic_folder = check_topic_folder(type, topic_id, 'images')
     image_file_name = File.join(topic_folder, "#{test_id}.gif")
     open(image_file_name, 'wb') do |file|
       file << open(src).read
@@ -126,6 +132,7 @@ describe "the open", :type => :feature do
 #      binding.pry
 
       index = curr_test_number
+      Kernel.puts "curr_test_number: #{curr_test_number.inspect}"
       test = parse_test(type, number, index)
       tests << test
 
@@ -133,12 +140,11 @@ describe "the open", :type => :feature do
 
       next_test
     end while index != curr_test_number
-    topic = {number: number, name: name, tests: tests}
+    topic = {type: type, number: number, name: name, tests: tests}
   end
 
   def save_topic(topic)
-    topic_folder = File.join("tests", "#{topic[:type]}")
-    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
+    topic_folder = check_topic_folder(topic[:type], topic[:number])
     topic_file = File.join(topic_folder, "topic_#{topic[:number]}.yaml")
     File.open(topic_file, "w") do |file|
       file.write(topic.to_yaml)
@@ -151,6 +157,7 @@ describe "the open", :type => :feature do
   end
 
   def curr_test_number
+    save_screenshot("screenshots/current_parsed_test_number.png")
     find("#navForm\\:info").text.split(" ")[0].to_i
   end  
 
@@ -174,7 +181,9 @@ describe "the open", :type => :feature do
   end
 
   def exit
-    Kernel.puts "EXIT with :#{find("a[id*=\"\\:sectnExit\"]").inspect}"
+    visit("/UCenter/pages/internet/index.jsf")
+    sleep 3
+    exit_link = find("a[id*=\"\\:sectnExit\"]")
     find("a[id*=\"\\:sectnExit\"]").click
     sleep 1
   end 
@@ -200,7 +209,7 @@ describe "the open", :type => :feature do
         type += 1
       end
     rescue => e
-      Kernel.puts "ERROR: #{e}\n#{e.backtrace[0..4].join("\n")}"
+      Kernel.puts "ERROR: #{e}\n#{e.backtrace.join("\n")}"
     ensure
       exit
     end
