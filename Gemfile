@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-ruby "1.9.3", :engine => "jruby", :engine_version => "1.7.19"
+#ruby "1.9.3", :engine => "jruby", :engine_version => "1.7.19"
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.1'
@@ -12,7 +12,7 @@ gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .coffee assets and views
 gem 'coffee-rails', '~> 4.1.0'
 # See https://github.com/rails/execjs#readme for more supported runtimes
-gem 'therubyrhino'
+#gem 'therubyrhino'
 # Use jquery as the JavaScript library
 gem 'jquery-rails'
 # Turbolinks makes following links in your web application faster. Read more: https://github.com/rails/turbolinks
@@ -40,6 +40,7 @@ group :development, :test do
 	gem 'rspec-support'#, github: 'rspec/rspec-support'
 	gem 'rspec-rails'
 	gem 'poltergeist'
+	gem 'phantomjs', require: 'phantomjs/poltergeist'
 	gem 'capybara'
 	gem 'launchy'
 end

@@ -10,16 +10,16 @@ describe "the open", :type => :feature do
   def login
     login_ = "trafficrulestest"
     password_ = "nhfaabrhektcgfhjkm"
-    login_ = "Avto21"
-    password_ = "lviv2015"
+    login_ = "test"
+    password_ = "12345678qwertyui"
 
     visit '/UCenter/pages/login/login.jsf?lang=uk_UA'
     within("#loginForm") do
        input = all("input", 1)[0]
-       login_input = all("input", 1)[0]
+       login_input = all('input', 1)[0]
        login_input_id =login_input[:id]
        login_input.set(login_)
-       pass_input = all("input", 1)[1]
+       pass_input = all('input', 1)[1]
        pass_input_id =pass_input[:id]
        pass_input.set(password_)
        submit_button = all("button", 1)[0]
@@ -41,10 +41,10 @@ describe "the open", :type => :feature do
     puts "Choose type: #{topic} successfully!"
   end
 
-  def select_topic(number = 0)
+  def select_topic(number = 0, type = 2)
     radiobuttons = all(".ui-radiobutton")
-    radiobuttons[2].click # Тематичні завдання "Сигнал 2014" (Київ)
-    radiobuttons[3].click # Українська мова
+    radiobuttons[type].click # Тематичні завдання "Сигнал 2014" (Київ)
+    radiobuttons[-2].click # Українська мова
     topic_text = find(".ui-selectlistbox-list").all("li")[number].text
     logit topic_text
     find(".ui-selectlistbox-list").all("li")[number].click
@@ -66,13 +66,13 @@ describe "the open", :type => :feature do
     img && img["src"]
   end
 
-  def check_topic_folder(topic_id)
-    topic_folder = File.join("tests/images", "#{topic_id}")
+  def check_topic_folder(topic_id, type)
+    topic_folder = File.join("tests", "#{type}", "images", "#{topic_id}")
     Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
     topic_folder
   end  
 
-  def save_image(topic_id, test_id, src)
+  def save_image(type, topic_id, test_id, src)
     topic_folder = check_topic_folder(topic_id)
     image_file_name = File.join(topic_folder, "#{test_id}.gif")
     open(image_file_name, 'wb') do |file|
@@ -81,7 +81,7 @@ describe "the open", :type => :feature do
     image_file_name
   end  
 
-  def parse_test(topic_number, test_number)
+  def parse_test(type_number, topic_number, test_number)
     puts "Parsing test #{test_number}."
     legend = "Коментар до питання "
     test = nil
@@ -89,7 +89,7 @@ describe "the open", :type => :feature do
 
     within("#qForm") do
       img_src = get_image
-      test_image = img_src.nil? ? nil : save_image(topic_number, test_number, img_src)
+      test_image = img_src.nil? ? nil : save_image(type_number, topic_number, test_number, img_src)
 
       test_answers = []
       test_text = all("fieldset")[0].find("div").text
@@ -119,8 +119,27 @@ describe "the open", :type => :feature do
     test
   end
 
+  def get_full_topic(number, name, type)
+    start
+    tests = []
+    begin
+#      binding.pry
+
+      index = curr_test_number
+      test = parse_test(type, number, index)
+      tests << test
+
+      save_topic({type: type, number: number, name: name, tests: tests})
+
+      next_test
+    end while index != curr_test_number
+    topic = {number: number, name: name, tests: tests}
+  end
+
   def save_topic(topic)
-    topic_file = File.join("tests", "topic_#{topic[:number]}.yaml")
+    topic_folder = File.join("tests", "#{topic[:type]}")
+    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
+    topic_file = File.join(topic_folder, "topic_#{topic[:number]}.yaml")
     File.open(topic_file, "w") do |file|
       file.write(topic.to_yaml)
     end
@@ -149,25 +168,14 @@ describe "the open", :type => :feature do
     sleep 1
   end  
 
-  def get_full_topic(number, name)
-    start
-    tests = []
-    begin
-#      binding.pry
-
-      index = curr_test_number
-      test = parse_test(number, index)
-      tests << test
-
-      save_topic({number: number, name: name, tests: tests})
-
-      next_test
-    end while index != curr_test_number
-    topic = {number: number, name: name, tests: tests}
-  end
-
   def exit_topic
     find("#navForm\\:cancelExam").click
+    sleep 1
+  end
+
+  def exit
+    Kernel.puts "EXIT with :#{find("a[id*=\"\\:sectnExit\"]").inspect}"
+    find("a[id*=\"\\:sectnExit\"]").click
     sleep 1
   end 
 
@@ -176,30 +184,25 @@ describe "the open", :type => :feature do
   end
 
   it "signs me in" do
-    login
-    topics_length = 37
-    num = 5
-    while num < 37
-      go_to_topics
-      topic = get_full_topic( num+1, select_topic(num) )
-      save_topic(topic)
-      exit_topic
-      num += 1
+    begin
+      login
+      type = 0
+      while type < 3
+        topics_length = 37
+        num = 0
+        while num < topics_length
+          go_to_topics
+          topic = get_full_topic(num+1, select_topic(num, type), type)
+          save_topic(topic)
+          exit_topic
+          num += 1
+        end
+        type += 1
+      end
+    rescue => e
+      Kernel.puts "ERROR: #{e}\n#{e.backtrace[0..4].join("\n")}"
+    ensure
+      exit
     end
-    #expect(page).to have_content 'Success'
-
-    # within("#session") do
-    #   fill_in 'Email', :with => 'user@example.com'
-    #   fill_in 'Password', :with => 'password'
-    # end
-    # click_button 'Sign in'
-    # expect(page).to have_content 'Success'
   end
 end
-
-=begin
-            33
-34
-            35
-36
-=end

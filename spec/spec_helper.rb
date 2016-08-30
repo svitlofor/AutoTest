@@ -1,9 +1,9 @@
 $: << File.join(File.dirname(File.dirname(__FILE__)), 'lib')
+require 'phantomjs'
 require 'capybara/rspec'
 require 'capybara/poltergeist'
 require 'test'
 require 'pry_debug'
-
 RSpec.configure do |config|
   #config.include FeatureSpecExtensions, type: :feature
 
@@ -12,7 +12,8 @@ RSpec.configure do |config|
       Capybara::Poltergeist::Driver.new(app, {
         js_errors: true,
         inspector: true,
-        phantomjs: ENV["PHANTOMJS_PATH"].gsub("\\", "/"),
+        phantomjs: Phantomjs.path,
+#        phantomjs: ENV["PHANTOMJS_PATH"].gsub("\\", "/"),
         phantomjs_options: ['--load-images=no', '--ignore-ssl-errors=yes'],
         timeout: 120
       })
