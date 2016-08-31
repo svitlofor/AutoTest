@@ -132,7 +132,6 @@ describe "the open", :type => :feature do
 #      binding.pry
 
       index = curr_test_number
-      Kernel.puts "curr_test_number: #{curr_test_number.inspect}"
       test = parse_test(type, number, index)
       tests << test
 
@@ -152,7 +151,7 @@ describe "the open", :type => :feature do
   end  
 
   def next_test
-    find("#navForm\\:j_idt53").click
+    find("#navForm\\:j_idt57").click
     sleep 1
   end
 
@@ -166,12 +165,12 @@ describe "the open", :type => :feature do
   end
 
   def test_plus_ten
-    find("#navForm\\:j_idt57").click
+    find("#navForm\\:j_idt62").click
     sleep 1
   end  
 
   def test_plus_five
-    find("#navForm\\:j_idt55").click
+    find("#navForm\\:j_idt60").click
     sleep 1
   end  
 
@@ -184,7 +183,7 @@ describe "the open", :type => :feature do
     visit("/UCenter/pages/internet/index.jsf")
     sleep 3
     exit_link = find("a[id*=\"\\:sectnExit\"]")
-    find("a[id*=\"\\:sectnExit\"]").click
+    exit_link.click
     sleep 1
   end 
 
@@ -197,7 +196,7 @@ describe "the open", :type => :feature do
       login
       type = 0
       while type < 3
-        topics_length = 37
+        topics_length = 5#37 guest mode
         num = 0
         while num < topics_length
           go_to_topics
@@ -210,6 +209,10 @@ describe "the open", :type => :feature do
       end
     rescue => e
       Kernel.puts "ERROR: #{e}\n#{e.backtrace.join("\n")}"
+      exit
+    rescue
+      Kernel.puts "ERROR!!!"
+      exit  
     ensure
       exit
     end
