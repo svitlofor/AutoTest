@@ -114,19 +114,19 @@ describe "the open", :type => :feature do
     result
   end
 
-  def check_topic_folder(hash, subfolder = nil)
+  def check_topic_folder(hash, *subfolders)
     topic_folder = File.dirname(File.join(__FILE__))
     topic_folder = grant_path(topic_folder, "tests")
     topic_folder = grant_path(topic_folder, hash[:entry])
     topic_folder = grant_path(topic_folder, hash[:type])
     topic_folder = grant_path(topic_folder, hash[:category]) if hash[:category]
-    topic_folder = grant_path(topic_folder, subfolder) if subfolder
+    subfolders.each { |subfolder| topic_folder = grant_path(topic_folder, subfolder) } if subfolders
 
     topic_folder
   end
 
   def save_image(hash, test_id, src)
-    topic_folder = check_topic_folder(hash, 'images')
+    topic_folder = check_topic_folder(hash, 'images', "#{test_id}")
     image_file_name = File.join(topic_folder, "#{test_id}.gif")
     open(image_file_name, 'wb') do |file|
       file << open(src).read
@@ -174,7 +174,7 @@ describe "the open", :type => :feature do
 
   def save_topic(hash)
     topic_folder = check_topic_folder(hash)
-    topic_file = File.join(topic_folder, "topic_#{hash[:number]}.yaml")
+    topic_file = File.join(topic_folder, "#{hash[:entry]}_#{hash[:number]}.yaml")
     File.open(topic_file, "w") do |file|
       file.write(hash.to_yaml)
     end
