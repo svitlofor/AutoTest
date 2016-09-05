@@ -126,7 +126,7 @@ describe "the open", :type => :feature do
   end
 
   def save_image(hash, test_id, src)
-    topic_folder = check_topic_folder(hash, 'images', "#{test_id}")
+    topic_folder = check_topic_folder(hash, 'images', "#{hash[:number]}")
     image_file_name = File.join(topic_folder, "#{test_id}.gif")
     open(image_file_name, 'wb') do |file|
       file << open(src).read
