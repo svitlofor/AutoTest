@@ -7,6 +7,8 @@ Capybara.run_server = false
 
 
 describe "the open", :type => :feature do
+  ENTRIES = { topics: "По темах", tickets: "По білетах"}
+
   def login
     login_ = "trafficrulestest"
     password_ = "nhfaabrhektcgfhjkm"
@@ -34,29 +36,69 @@ describe "the open", :type => :feature do
     puts "Logged in successfully!"
   end
 
-  def go_to_topics(topic = "По темах")
-    find_link(topic).click
+  def go_index
+    visit("/UCenter/pages/internet/index.jsf")
     sleep 3
-    save_screenshot("screenshots/go_to_topic_result.png")
-    puts "Choose type: #{topic} successfully!"
   end
 
-  def select_topic(number = 0, type = 2)
-    radiobuttons = all(".ui-radiobutton")
-    radiobuttons[type].click # Тематичні завдання "Сигнал 2014" (Київ)
-    radiobuttons[-2].click # Українська мова
-    topic_text = find(".ui-selectlistbox-list").all("li")[number].text
-    logit topic_text
-    find(".ui-selectlistbox-list").all("li")[number].click
+  def go_to_entry(entry)
+    go_index
+    find_link(ENTRIES[entry]).click
     sleep 1
+    save_screenshot("screenshots/go_to_topic_result.png")
+    puts "Choose entry: #{entry} successfully!"
+  end
 
-    save_screenshot("screenshots/select_topic_result.png")
-    puts "Select topic #{type} #{number} #{topic_text} successfully!"
-    topic_text
-  end  
+  def types_count
+    all(".ui-radiobutton").length - 2 # мови 
+  end
+
+  def select_type(type = 2)# Тематичні завдання "Сигнал 2014" (Київ)
+    item = all(".ui-radiobutton")[type]
+    item.click
+    sleep 1
+    puts "Select type #{type} successfully!"
+    save_screenshot("screenshots/select_type_#{type}.png")
+  end
+
+  def categories_count
+    lists = all(".ui-selectlistbox-list")
+    return 0 if lists.count == 1
+    lists.first.all("li").size
+  end
+
+  def select_category(cat_num = 0)
+    lists = all(".ui-selectlistbox-list")
+    return "" if lists.count == 1
+    item = lists.first.all("li")[cat_num]
+    item.click
+    sleep 1
+    puts "Select category #{cat_num} #{item.text} successfully!"
+    item.text
+  end
+
+  def select_language
+    radiobuttons = all(".ui-radiobutton")
+    radiobuttons[-2].click # Українська мова
+  end
+
+  def topics_count
+    save_screenshot("screenshots/topics_count.png")    
+    all(".ui-selectlistbox-list").last.all("li").size
+    2
+  end
+
+  def select_topic(number = 0)
+    save_screenshot("screenshots/select_topic_#{number}.png")
+    item = all(".ui-selectlistbox-list").last.all("li")[number]
+    item.click
+    Kernel.puts "Select topic #{number} #{item.text} successfully!"
+    item.text
+  end
 
   def start
-    find("#optform\\:learnAll").click
+    button = all("#optform\\:learnAll").first || all("#mainForm\\:j_idt62").first
+    button.click
     sleep 1
     save_screenshot("screenshots/start_result.png")
   end
@@ -66,28 +108,33 @@ describe "the open", :type => :feature do
     img && img["src"]
   end
 
-  def check_topic_folder(type, topic_id, subfolder = nil)
-    topic_folder = File.dirname(File.join(__FILE__))
-    topic_folder = File.join(topic_folder, "tests")
-    topic_folder = File.join(topic_folder, "#{type}")
-    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
-    topic_folder = File.join(topic_folder, subfolder) if subfolder
-    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
-    topic_folder = File.join(topic_folder, "#{topic_id}") 
-    Dir.mkdir(topic_folder) unless Dir.exists?(topic_folder)
-    topic_folder
-  end  
+  def grant_path(base, dir)
+    result = File.join(base, "#{dir}")
+    Dir.mkdir(result) unless Dir.exists?(result)
+    result
+  end
 
-  def save_image(type, topic_id, test_id, src)
-    topic_folder = check_topic_folder(type, topic_id, 'images')
+  def check_topic_folder(hash, subfolder = nil)
+    topic_folder = File.dirname(File.join(__FILE__))
+    topic_folder = grant_path(topic_folder, "tests")
+    topic_folder = grant_path(topic_folder, hash[:entry])
+    topic_folder = grant_path(topic_folder, hash[:type])
+    topic_folder = grant_path(topic_folder, hash[:category]) if hash[:category]
+    topic_folder = grant_path(topic_folder, subfolder) if subfolder
+
+    topic_folder
+  end
+
+  def save_image(hash, test_id, src)
+    topic_folder = check_topic_folder(hash, 'images')
     image_file_name = File.join(topic_folder, "#{test_id}.gif")
     open(image_file_name, 'wb') do |file|
       file << open(src).read
     end
     image_file_name
-  end  
+  end
 
-  def parse_test(type_number, topic_number, test_number)
+  def parse_test(hash, test_number)
     puts "Parsing test #{test_number}."
     legend = "Коментар до питання "
     test = nil
@@ -95,7 +142,7 @@ describe "the open", :type => :feature do
 
     within("#qForm") do
       img_src = get_image
-      test_image = img_src.nil? ? nil : save_image(type_number, topic_number, test_number, img_src)
+      test_image = img_src.nil? ? nil : save_image(hash, test_number, img_src)
 
       test_answers = []
       test_text = all("fieldset")[0].find("div").text
@@ -125,28 +172,11 @@ describe "the open", :type => :feature do
     test
   end
 
-  def get_full_topic(number, name, type)
-    start
-    tests = []
-    begin
-#      binding.pry
-
-      index = curr_test_number
-      test = parse_test(type, number, index)
-      tests << test
-
-      save_topic({type: type, number: number, name: name, tests: tests})
-
-      next_test
-    end while index != curr_test_number
-    topic = {type: type, number: number, name: name, tests: tests}
-  end
-
-  def save_topic(topic)
-    topic_folder = check_topic_folder(topic[:type], topic[:number])
-    topic_file = File.join(topic_folder, "topic_#{topic[:number]}.yaml")
+  def save_topic(hash)
+    topic_folder = check_topic_folder(hash)
+    topic_file = File.join(topic_folder, "topic_#{hash[:number]}.yaml")
     File.open(topic_file, "w") do |file|
-      file.write(topic.to_yaml)
+      file.write(hash.to_yaml)
     end
   end  
 
@@ -180,12 +210,87 @@ describe "the open", :type => :feature do
   end
 
   def exit
-    visit("/UCenter/pages/internet/index.jsf")
-    sleep 3
+    go_index
     exit_link = find("a[id*=\"\\:sectnExit\"]")
     exit_link.click
     sleep 1
   end 
+
+  def get_full_topic(hash)
+    start
+    tests = []
+    begin
+#      binding.pry
+
+      index = curr_test_number
+      test = parse_test(hash, index)
+      tests << test
+      hash[:tests] = tests
+      save_topic(hash)
+
+      next_test
+    end while index != curr_test_number
+    topic = hash
+  end
+
+  def process_all_topics(entry, type, category_num = nil )
+    Kernel.puts "process_all_topics type: #{type}, category_num: #{category_num.inspect}"
+    num = 0
+    hash = { entry: entry, type: type }
+    hash.update(category: select_category(category_num)) if category_num
+    topics_size = topics_count
+    while num < topics_size
+      select_language
+      hash.update(number: (num + 1), topic: select_topic(num))
+      topic_hash = get_full_topic(hash)
+      save_topic(topic_hash)
+      exit_topic
+      num += 1
+      if num < topics_size
+        go_index
+        go_to_entry(entry)
+        select_type(type)
+        select_category(category_num) if category_num
+      end
+    end
+  end
+
+  def process_type(entry, type)
+    select_type(type)
+    Kernel.puts "type: #{type}, categories_count: #{categories_count.inspect}"
+    if categories_count == 0
+      process_all_topics(entry, type)
+    else
+      cat_num = 0
+      categories_size = categories_count
+      while cat_num < categories_size
+        process_all_topics(entry, type, cat_num)
+        cat_num += 1
+        if cat_num < categories_size
+          go_index
+          go_to_entry(entry)
+          select_type(type)
+        end
+      end
+    end
+  end
+
+  def process_entries
+    ENTRIES.each do |key, v|
+      type = 0
+      go_to_entry(key)
+      Kernel.puts "entry: #{key}, types: #{types_count.inspect}"
+      types_size = types_count
+      while type < types_size
+        process_type(key, type)
+        type += 1
+        if type < types_size
+          go_index
+          go_to_entry(key)   
+        end  
+      end
+    end      
+  end
 
   before :each do
     #User.make(:email => 'user@example.com', :password => 'password')
@@ -194,27 +299,15 @@ describe "the open", :type => :feature do
   it "signs me in" do
     begin
       login
-      type = 0
-      while type < 3
-        topics_length = 5#37 guest mode
-        num = 0
-        while num < topics_length
-          go_to_topics
-          topic = get_full_topic(num+1, select_topic(num, type), type)
-          save_topic(topic)
-          exit_topic
-          num += 1
-        end
-        type += 1
-      end
+      process_entries
     rescue => e
-      Kernel.puts "ERROR: #{e}\n#{e.backtrace.join("\n")}"
-      exit
+        Kernel.puts "ERROR: #{e}\n#{e.backtrace.join("\n")}"
+        exit
     rescue
-      Kernel.puts "ERROR!!!"
-      exit  
+        Kernel.puts "ERROR!!!"
+        exit
     ensure
-      exit
+        exit
     end
   end
 end
