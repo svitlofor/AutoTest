@@ -55,10 +55,12 @@ describe "the open", :type => :feature do
 
   def select_type(type = 2)# Тематичні завдання "Сигнал 2014" (Київ)
     item = all(".ui-radiobutton")[type]
+    text = item.find(:xpath, "..").find(:xpath, "./following-sibling::td").find("label").text
     item.click
     sleep 1
     puts "Select type #{type} successfully!"
     save_screenshot("screenshots/select_type_#{type}.png")
+    text
   end
 
   def categories_count
@@ -83,9 +85,9 @@ describe "the open", :type => :feature do
   end
 
   def topics_count
-    save_screenshot("screenshots/topics_count.png")    
+    save_screenshot("screenshots/topics_count.png")
     all(".ui-selectlistbox-list").last.all("li").size
-    2
+    5
   end
 
   def select_topic(number = 0)
@@ -133,6 +135,33 @@ describe "the open", :type => :feature do
     end
     image_file_name
   end
+
+  def save_map(hash)
+    topic_folder = File.dirname(File.join(__FILE__))
+    topic_folder = grant_path(topic_folder, "tests")
+    map_file = File.join(topic_folder, "map.yaml")
+    data = {}
+    if File.exists?(map_file)
+      File.open(map_file, 'r:UTF-8') do |file|
+        data = YAML.load(file.read) || {}
+      end
+    end
+
+    File.open(map_file, "w") do |file|
+      file.write(merge_hashes(hash, data).to_yaml)
+    end
+  end
+
+  def merge_hashes(hash, data)
+    data[:entries] = [] unless data[:entries]
+    data[:entries] << hash[:entry] unless data[:entries].include?(hash[:entry])
+
+    data[:types] = {} unless data[:types]
+    type = data[:types][hash[:type_title]]
+    type = data[:types][hash[:type_title]] = [] unless type
+    type << hash[:category] unless type.include?(hash[:category]) || !hash[:category] || hash[:category].empty?
+    data
+  end  
 
   def parse_test(hash, test_number)
     puts "Parsing test #{test_number}."
@@ -233,11 +262,12 @@ describe "the open", :type => :feature do
     topic = hash
   end
 
-  def process_all_topics(entry, type, category_num = nil )
+  def process_all_topics(entry, type, type_title, category_num = nil )
     Kernel.puts "process_all_topics type: #{type}, category_num: #{category_num.inspect}"
     num = 0
-    hash = { entry: entry, type: type }
+    hash = { entry: entry, type: type, type_title: type_title }
     hash.update(category: select_category(category_num)) if category_num
+    save_map(hash)
     topics_size = topics_count
     while num < topics_size
       select_language
@@ -256,15 +286,15 @@ describe "the open", :type => :feature do
   end
 
   def process_type(entry, type)
-    select_type(type)
+    type_title = select_type(type)
     Kernel.puts "type: #{type}, categories_count: #{categories_count.inspect}"
     if categories_count == 0
-      process_all_topics(entry, type)
+      process_all_topics(entry, type, type_title)
     else
       cat_num = 0
       categories_size = categories_count
       while cat_num < categories_size
-        process_all_topics(entry, type, cat_num)
+        process_all_topics(entry, type, type_title, cat_num)
         cat_num += 1
         if cat_num < categories_size
           go_index
@@ -286,7 +316,7 @@ describe "the open", :type => :feature do
         type += 1
         if type < types_size
           go_index
-          go_to_entry(key)   
+          go_to_entry(key)
         end  
       end
     end      
