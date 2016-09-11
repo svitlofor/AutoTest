@@ -14,6 +14,8 @@ tests.zip
 /db/*.sqlite3
 /db/*.sqlite3-journal
 /public/system
+/public/test_tests
+/spec/test1/tests
 /coverage/
 /spec/tmp
 **.orig
